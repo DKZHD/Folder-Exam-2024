@@ -11,8 +11,9 @@ public:
 	{
 		return s_window;
 	}
-private:
 	GLFWwindow* s_window = nullptr;
+
+private:
 	static void WindowSizeCallback(GLFWwindow* window, int width, int height);
 
 };

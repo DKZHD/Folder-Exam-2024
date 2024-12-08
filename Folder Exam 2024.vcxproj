@@ -111,7 +111,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)Dependencies/lib/;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;lua54.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -131,10 +131,15 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)Dependencies/lib/;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;lua54.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ParticleSystem\ParticleSystem.cpp" />
+    <ClCompile Include="Raycast.cpp" />
+    <ClCompile Include="src\Lua\LuaCustom.cpp" />
+    <ClCompile Include="src\ECS\EntityManager\EntityManager.cpp" />
+    <ClCompile Include="src\ECS\ComponentManager\ComponentManager.cpp" />
     <ClCompile Include="Dependencies\includes\glad.c" />
     <ClCompile Include="Dependencies\includes\glm\detail\glm.cpp" />
     <ClCompile Include="Dependencies\includes\imgui\imgui.cpp" />
@@ -155,8 +160,14 @@
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\UI\UI.cpp" />
     <ClCompile Include="src\Window\Window.cpp" />
+    <ClCompile Include="src\ECS\Systems\Systems.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ParticleSystem\ParticleSystem.h" />
+    <ClInclude Include="Raycast.h" />
+    <ClInclude Include="src\Lua\LuaCustom.h" />
+    <ClInclude Include="src\ECS\EntityManager\EntityManager.h" />
+    <ClInclude Include="src\ECS\ComponentManager\ComponentManager.h" />
     <ClInclude Include="Dependencies\includes\glad\glad.h" />
     <ClInclude Include="Dependencies\includes\GLFW\glfw3.h" />
     <ClInclude Include="Dependencies\includes\GLFW\glfw3native.h" />
@@ -449,8 +460,12 @@
     <ClInclude Include="Dependencies\includes\imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="Dependencies\includes\imgui\imgui_internal.h" />
     <ClInclude Include="Dependencies\includes\KHR\khrplatform.h" />
+    <ClInclude Include="Dependencies\includes\sol\forward.hpp" />
+    <ClInclude Include="Dependencies\includes\sol\sol.hpp" />
+    <ClInclude Include="Dependencies\includes\sol\state.hpp" />
     <ClInclude Include="Dependencies\includes\stb_image.h" />
     <ClInclude Include="src\Camera\Camera.h" />
+    <ClInclude Include="src\ECS\Components\Components.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\Input\Input.h" />
     <ClInclude Include="src\Loaders\fileLoader.h" />
@@ -460,6 +475,7 @@
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\UI\UI.h" />
     <ClInclude Include="src\Window\Window.h" />
+    <ClInclude Include="src\ECS\Systems\Systems.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Dependencies\includes\glm\detail\func_common.inl" />

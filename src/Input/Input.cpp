@@ -1,10 +1,14 @@
 #include "Input.h"
 #include <algorithm>
+
+#include "../Engine.h"
+#include "../../Raycast.h"
 #include "../Camera/Camera.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/detail/func_trigonometric.inl"
 #include "glm/ext/quaternion_geometric.hpp"
+#include "imgui/imgui.h"
 
 void Input::processInput(GLFWwindow* window, Camera& camera)
 {
@@ -49,9 +53,19 @@ void Input::Keyboard::KeyCallback(GLFWwindow* window, int key, int scancode, int
 			{
 				Input::Mouse::firstMouse = true;
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 			}
 			else
+			{
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+			}
+
+
+			break;
+
+		case GLFW_KEY_R:
+			Engine::GetInstance().luaCustom.LoadFiles("RunningScript.lua");
 			break;
 		case GLFW_KEY_TAB:
 			if (wireframe)
@@ -119,5 +133,13 @@ void Input::Mouse::MouseMoveCallback(GLFWwindow* window, double xPos, double yPo
 
 void Input::Mouse::MouseScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
 {
-	cameraPtr->camSpeed = std::clamp(cameraPtr->camSpeed + static_cast<float>(y_offset),0.05f,20.f);
+	cameraPtr->camSpeed = std::clamp(cameraPtr->camSpeed + static_cast<float>(y_offset*0.05f),0.05f,20.f);
+}
+
+void Input::Mouse::MouseClickCallback(GLFWwindow* window, int key, int action, int mods)
+{
+	if(action == GLFW_PRESS && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
+	{
+		Raycast::onMouseClick(Engine::GetInstance().camera.getProjMat(), Engine::GetInstance().camera.getViewMat());
+	}
 }

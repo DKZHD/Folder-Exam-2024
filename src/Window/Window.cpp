@@ -3,6 +3,7 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "../Input/Input.h"
+#include "imgui/imgui.h"
 
 void Window::init()
 {
@@ -18,10 +19,16 @@ void Window::init()
 	glViewport(0, 0, 1920, 1080);
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(s_window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 	glfwSetCursorPosCallback(s_window, &Input::Mouse::MouseMoveCallback);
 	glfwSetScrollCallback(s_window, Input::Mouse::MouseScrollCallback);
 	glfwSetKeyCallback(s_window, Input::Keyboard::KeyCallback);
 	glfwSetFramebufferSizeCallback(s_window, &WindowSizeCallback);
+	glfwSetMouseButtonCallback(s_window, &Input::Mouse::MouseClickCallback);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPointSize(0.01f);
 	//glLineWidth(5.f);
 }
@@ -29,7 +36,7 @@ void Window::init()
 void Window::ClearBuffers()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.f, 0.3f, 0.6f, 1.f);
+	glClearColor(0.f, 0.4f, 0.6f, 1.f);
 }
 
 void Window::WindowSizeCallback(GLFWwindow* window, int width, int height)

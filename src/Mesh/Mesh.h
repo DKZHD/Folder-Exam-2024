@@ -9,8 +9,15 @@ struct Vertex
 	glm::vec3 pos;
 	glm::vec3 normal = glm::vec3(0.f);
 	glm::vec3 color = glm::vec3(0.f);
+	Vertex() = default;
 	Vertex(glm::vec3 pos) : pos(pos){}
 	Vertex(glm::vec3 pos, glm::vec3 normal) : pos(pos), normal(normal){}
+};
+
+struct AABB
+{
+	glm::vec3 min;
+	glm::vec3 max;
 };
 
 enum class MeshType
@@ -32,20 +39,20 @@ public:
 
 	void UpdateVelocity(glm::vec3 vel);
 	bool checkCollision(Mesh& mesh);
+	void UpdateBoundingBox();
 
 	void Update(float deltaTime, float gravity);
 	void Render(uint32_t program) const;
 	void TrackBall(float deltaTime);
 
-	glm::vec3 position;
 	glm::vec3 velocity = glm::vec3(0.f);
+
+	unsigned int id = 0;
+
+	AABB boundingBox;
 
 private:
 	void BindBuffer();
-
-	uint32_t vbo = 0, ebo = 0, vao = 0;
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
 
 	unsigned tracking_vbo = 0, tracking_vao = 0;
 	std::vector<Vertex> trackingPoints;
@@ -82,8 +89,8 @@ private:
 
 	int numPrRow = 0;
 
-	glm::vec3 position;
-	glm::vec3 scale;
+	glm::vec3 position = glm::vec3(0.f);
+	glm::vec3 scale = glm::vec3(0.f);
 };
 
 

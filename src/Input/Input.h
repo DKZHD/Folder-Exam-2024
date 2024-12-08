@@ -22,6 +22,7 @@ namespace Input
 	public:
 		static void MouseMoveCallback(GLFWwindow* window, double xPos, double yPos);
 		static void MouseScrollCallback(GLFWwindow* window, double x_offset, double y_offset);
+		static void MouseClickCallback(GLFWwindow* window, int key, int action, int mods);
 		inline static Camera* cameraPtr = nullptr;
 		inline static bool firstMouse = true;
 	private:

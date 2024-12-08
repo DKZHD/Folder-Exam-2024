@@ -1,26 +1,29 @@
 #include "Scene.h"
+
+#include "../ECS/Systems/Systems.h"
 #include "glm/vec3.hpp"
 
-void Scene::AddMesh(MeshType type, glm::vec3 pos, glm::vec3 scale)
+unsigned Scene::AddMesh(MeshType type, glm::vec3 pos, glm::vec3 scale)
 {
-	meshes.emplace_back(new Mesh(type,pos,scale));
+	meshes.emplace_back(type,pos,scale);
+	return meshes.back().id;
 }
 
 void Scene::UpdateScene(float deltaTime, float gravity, bool collision)
 {
-	for(Mesh* mesh : meshes)
+	for(Mesh& mesh : meshes)
 	{
 		if(collision)
 		{
-			for(Mesh* mesh2 : meshes)
+			for(Mesh& mesh2 : meshes)
 			{
-				if(mesh == mesh2)
+				if(&mesh == &mesh2)
 					continue;
-				mesh->checkCollision(*mesh2);
+				mesh.checkCollision(mesh2);
 			}
 		}
-		mesh->Update(deltaTime,gravity);
-		mesh->TrackBall(deltaTime);
+		mesh.Update(deltaTime,gravity);
+		mesh.TrackBall(deltaTime);
 	}
 }
 
@@ -36,7 +39,7 @@ MathMesh& Scene::GetTerrain() const
 
 Mesh& Scene::GetMeshAt(uint32_t index)
 {
-	return *meshes[index];
+	return meshes[index];
 }
 
 uint32_t Scene::GetMeshesSize()
@@ -44,11 +47,13 @@ uint32_t Scene::GetMeshesSize()
 	return meshes.size();
 }
 
+std::vector<Mesh>& Scene::GetMeshes()
+{
+	return meshes;
+}
+
 void Scene::RenderScene(uint32_t program)
 {
-	terrain.Render(program);
-	for(Mesh* mesh : meshes)
-	{
-		mesh->Render(program);
-	}
+	//terrain.Render(program);
+	MeshSystem::Render(program);
 }

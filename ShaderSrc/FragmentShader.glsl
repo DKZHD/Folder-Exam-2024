@@ -8,9 +8,12 @@ uniform vec3 viewPos;
 
 void main()
 {
+    vec3 edge1 = dFdx(FragPos);
+    vec3 edge2 = dFdy(FragPos);
+    vec3 aNormal = normalize(cross(edge1,edge2));
 	vec3 lightColor = vec3(1.0, 1.0, 1.0);
 
-    vec3 NormalizedNormal = normalize(Normal);
+    vec3 NormalizedNormal = normalize(aNormal);
 
     // Ambient lighting
     float ambientStrength = 0.6;

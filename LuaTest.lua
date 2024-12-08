@@ -1,0 +1,1 @@
+addMesh("Cube",vec3(0),vec3(25,1,25))

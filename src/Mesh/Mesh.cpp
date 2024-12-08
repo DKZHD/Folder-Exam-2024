@@ -1,18 +1,29 @@
 #include "Mesh.h"
 #include <iostream>
 #include "../Engine.h"
+#include "../ECS/ComponentManager/ComponentManager.h"
+#include "../ECS/Components/Components.h"
+#include "../ECS/EntityManager/EntityManager.h"
 #include "../Input/Input.h"
 #include "../Loaders/fileLoader.h"
 #include "../Math/Math.h"
 #include "glad/glad.h"
 #include "glm/ext/matrix_transform.hpp"
 
-
-Mesh::Mesh(MeshType type, glm::vec3 pos, glm::vec3 scale) : position(pos),scale(scale), radius(scale.x)
+Mesh::Mesh(MeshType type, glm::vec3 pos, glm::vec3 scale) : scale(scale), radius(scale.x)
 {
+	id = EntityManager::GetInstance().AddEntity();
+	ComponentManager::GetInstance().addComponents<BufferComponent>(id);
+	ComponentManager::GetInstance().addComponents<PositionComponent>(id);
+	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
+	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+
+	pc.position = pos;
+
 	if(type==MeshType::Cube)
 	{
-		vertices = {
+
+		bc.vertices = {
 		    glm::vec3(-0.5,-0.5,0.5),
 		    glm::vec3(0.5,-0.5,0.5),
 		    glm::vec3(0.5,0.5,0.5),
@@ -23,7 +34,12 @@ Mesh::Mesh(MeshType type, glm::vec3 pos, glm::vec3 scale) : position(pos),scale(
 		    glm::vec3(-0.5,0.5,-0.5)
 		};
 
-		indices = {
+		for(Vertex& vert : bc.vertices)
+		{
+			vert.color = glm::vec3(1.f);
+		}
+
+		bc.indices = {
 			0,1,2,2,3,0,
 			0,3,7,7,4,0,
 			3,2,6,6,7,3,
@@ -34,13 +50,13 @@ Mesh::Mesh(MeshType type, glm::vec3 pos, glm::vec3 scale) : position(pos),scale(
 	}
 	if(type==MeshType::Sphere)
 	{
-		vertices.emplace_back(glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f));
-		vertices.emplace_back(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f));
-		vertices.emplace_back(glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
-		vertices.emplace_back(glm::vec3(-1.f, 0.f, 0.f), glm::vec3(-1.f, 0.f, 0.f));
-		vertices.emplace_back(glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.f, -1.f, 0.f));
-		vertices.emplace_back(glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 0.f, -1.f));
-		for(Vertex& vert : vertices)
+		bc.vertices.emplace_back(glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f));
+		bc.vertices.emplace_back(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f));
+		bc.vertices.emplace_back(glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+		bc.vertices.emplace_back(glm::vec3(-1.f, 0.f, 0.f), glm::vec3(-1.f, 0.f, 0.f));
+		bc.vertices.emplace_back(glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.f, -1.f, 0.f));
+		bc.vertices.emplace_back(glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 0.f, -1.f));
+		for(Vertex& vert : bc.vertices)
 		{
 			vert.color = glm::vec3(1.f, 0.f, 0.f);
 		}
@@ -58,23 +74,22 @@ Mesh::Mesh(MeshType type, glm::vec3 pos, glm::vec3 scale) : position(pos),scale(
 
 void Mesh::Subdivide(int index1, int index2, int index3, int i, glm::vec3 color)
 {
+	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
 	if (i > 0) {
-		glm::vec3 pos1 = glm::normalize(vertices[index1].pos + vertices[index2].pos);
-		int t_index1 = vertices.size();
-		vertices.emplace_back(pos1, pos1);
-		vertices.back().color = color;
+		glm::vec3 pos1 = glm::normalize(bc.vertices[index1].pos + bc.vertices[index2].pos);
+		int t_index1 = bc.vertices.size();
+		bc.vertices.emplace_back(pos1, pos1);
+		bc.vertices.back().color = color;
 
-		glm::vec3 pos2 = glm::normalize(vertices[index1].pos + vertices[index3].pos);
-		int t_index2 = vertices.size();
-		vertices.emplace_back(pos2, pos2);
-		vertices.back().color = color;
+		glm::vec3 pos2 = glm::normalize(bc.vertices[index1].pos + bc.vertices[index3].pos);
+		int t_index2 = bc.vertices.size();
+		bc.vertices.emplace_back(pos2, pos2);
+		bc.vertices.back().color = color;
 
-
-		glm::vec3 pos3 = glm::normalize(vertices[index3].pos + vertices[index2].pos);
-		int t_index3 = vertices.size();
-		vertices.emplace_back(pos3, pos3);
-		vertices.back().color = color;
-
+		glm::vec3 pos3 = glm::normalize(bc.vertices[index3].pos + bc.vertices[index2].pos);
+		int t_index3 = bc.vertices.size();
+		bc.vertices.emplace_back(pos3, pos3);
+		bc.vertices.back().color = color;
 
 		Subdivide(index1, t_index1, t_index2, i - 1,color);
 		Subdivide(index3, t_index2, t_index3, i - 1,color);
@@ -82,25 +97,28 @@ void Mesh::Subdivide(int index1, int index2, int index3, int i, glm::vec3 color)
 		Subdivide(t_index3, t_index2, t_index1, i - 1,color);
 	}
 	else {
-		indices.emplace_back(index1);
-		indices.emplace_back(index2);
-		indices.emplace_back(index3);
+		bc.indices.emplace_back(index1);
+		bc.indices.emplace_back(index2);
+		bc.indices.emplace_back(index3);
 	}
 }
 
 void Mesh::UpdatePosition(glm::vec3 pos)
 {
-	position += pos;
+	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	pc.position += pos;
 }
 
 void Mesh::SetPosition(glm::vec3 pos)
 {
-	position = pos;
+	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	pc.position = pos;
 }
 
 glm::vec3& Mesh::GetPosition() const
 {
-	return const_cast<glm::vec3&>(position);
+	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	return const_cast<glm::vec3&>(pc.position);
 }
 
 void Mesh::UpdateVelocity(glm::vec3 vel)
@@ -110,86 +128,99 @@ void Mesh::UpdateVelocity(glm::vec3 vel)
 
 bool Mesh::checkCollision(Mesh& mesh)
 {
-	float dx = mesh.GetPosition().x - GetPosition().x;
-	float dy = mesh.GetPosition().y - GetPosition().y;
-	float dz = mesh.GetPosition().z - GetPosition().z;
-	float l = sqrtf(dx * dx + dy * dy+dz*dz);
-	float d = radius + mesh.radius;
-	if (l >= d)
-		return false;
+	//float dx = mesh.GetPosition().x - GetPosition().x;
+	//float dy = mesh.GetPosition().y - GetPosition().y;
+	//float dz = mesh.GetPosition().z - GetPosition().z;
+	//float l = sqrtf(dx * dx + dy * dy+dz*dz);
+	//float d = radius + mesh.radius;
+	//if (l >= d)
+	//	return false;
 
-	float detM = mass + mesh.mass;
-	float numM1 = 2 * mass;
-	float numM2 = 2 * mesh.mass;
+	//float detM = mass + mesh.mass;
+	//float numM1 = 2 * mass;
+	//float numM2 = 2 * mesh.mass;
 
-	float v1Num = glm::dot(velocity - mesh.velocity, GetPosition() - mesh.GetPosition());
-	float v2Num = glm::dot(mesh.velocity - velocity, mesh.GetPosition() - GetPosition());
+	//float v1Num = glm::dot(velocity - mesh.velocity, GetPosition() - mesh.GetPosition());
+	//float v2Num = glm::dot(mesh.velocity - velocity, mesh.GetPosition() - GetPosition());
 
-	float detV1 = glm::distance(GetPosition(), mesh.GetPosition());
-	float detV2 = glm::distance(mesh.GetPosition(), GetPosition());
+	//float detV1 = glm::distance(GetPosition(), mesh.GetPosition());
+	//float detV2 = glm::distance(mesh.GetPosition(), GetPosition());
 
-	glm::vec3 v1 = velocity - (numM2 / detM) * (v1Num / (detV1 * detV1)) * (GetPosition() - mesh.GetPosition());
-	glm::vec3 v2 = mesh.velocity - (numM1 / detM) * (v2Num / (detV2 * detV2)) * (mesh.GetPosition() - GetPosition());
+	//glm::vec3 v1 = velocity - (numM2 / detM) * (v1Num / (detV1 * detV1)) * (GetPosition() - mesh.GetPosition());
+	//glm::vec3 v2 = mesh.velocity - (numM1 / detM) * (v2Num / (detV2 * detV2)) * (mesh.GetPosition() - GetPosition());
 
-	velocity = v1;
-	mesh.velocity = v2;
+	//velocity = v1;
+	//mesh.velocity = v2;
 
-	glm::vec3 collisionV1 = glm::normalize(mesh.GetPosition() - GetPosition());
+	//glm::vec3 collisionV1 = glm::normalize(mesh.GetPosition() - GetPosition());
 
-	position = position + collisionV1 * ((l - d) / 2.f);
-	mesh.position = mesh.position - collisionV1 * ((l - d) / 2.f);
+	//position = position + collisionV1 * ((l - d) / 2.f);
+	//mesh.position = mesh.position - collisionV1 * ((l - d) / 2.f);
 
-	return true;
+	//return true;
+	return false;
+}
+
+void Mesh::UpdateBoundingBox()
+{
+	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	glm::vec3 halfScale = scale * 0.5f;
+
+	boundingBox.min = pc.position - halfScale;
+	boundingBox.max = pc.position + halfScale;
 }
 
 void Mesh::Update(float deltaTime, float gravity)
 {
-	velocity.y += gravity * deltaTime;
-	MathMesh& terrain = Engine::GetInstance().scene.GetTerrain();
-	float height = terrain.GetHeightAtPosition(position);
-	if(position.y-radius<height)
-	{
-		velocity.y = 0.f;
-		position.y = height + radius;
-		glm::vec3 surfaceNormal = terrain.GetNormalAtPosition(position);
-		glm::vec3 G = glm::vec3(0.f,-gravity*mass,0.f);
+	//velocity.y += gravity * deltaTime;
+	//MathMesh& terrain = Engine::GetInstance().scene.GetTerrain();
+	//float height = terrain.GetHeightAtPosition(position);
+	//if(position.y-radius<height)
+	//{
+	//	velocity.y = 0.f;
+	//	position.y = height + radius;
+	//	glm::vec3 surfaceNormal = terrain.GetNormalAtPosition(position);
+	//	glm::vec3 G = glm::vec3(0.f,-gravity*mass,0.f);
 
-		glm::vec3 a = -gravity * glm::vec3(surfaceNormal.x*surfaceNormal.y,surfaceNormal.y*surfaceNormal.y-1.f,surfaceNormal.z*surfaceNormal.y);
-		float frictionCoefficient = terrain.GetFrictionCoEfficient(position);
-		if (glm::length(velocity) > 0.0f)
-		{
-			glm::vec3 frictionAcceleration = -frictionCoefficient * glm::length(velocity) / deltaTime * glm::normalize(velocity);
-			a += frictionAcceleration;
-		}
+	//	glm::vec3 a = -gravity * glm::vec3(surfaceNormal.x*surfaceNormal.y,surfaceNormal.y*surfaceNormal.y-1.f,surfaceNormal.z*surfaceNormal.y);
+	//	float frictionCoefficient = terrain.GetFrictionCoEfficient(position);
+	//	if (glm::length(velocity) > 0.0f)
+	//	{
+	//		glm::vec3 frictionAcceleration = -frictionCoefficient * glm::length(velocity) / deltaTime * glm::normalize(velocity);
+	//		a += frictionAcceleration;
+	//	}
 
-		velocity += a * deltaTime;
+	//	velocity += a * deltaTime;
 
-		if (glm::length(glm::vec3(velocity.x, 0.f, velocity.z)) < 0.01)
-		{
-			velocity = glm::vec3(0.f);
-		}
-	}
-	if (glm::length(glm::vec3(velocity.x, 0.f, velocity.z)) > 0.0f)
-	{
-		glm::vec3 rotationAxis = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), velocity));
-		float rotationAmount = glm::length(glm::vec3(velocity.x, 0.f, velocity.z)) * deltaTime / radius;
-		glm::mat4 incrementalRotation = glm::rotate(glm::mat4(1.0f), rotationAmount, rotationAxis);
-		rotationMatrix = incrementalRotation * rotationMatrix;
-	}
-	
-	position += velocity * deltaTime;
+	//	if (glm::length(glm::vec3(velocity.x, 0.f, velocity.z)) < 0.01)
+	//	{
+	//		velocity = glm::vec3(0.f);
+	//	}
+	//}
+	//if (glm::length(glm::vec3(velocity.x, 0.f, velocity.z)) > 0.0f)
+	//{
+	//	glm::vec3 rotationAxis = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), velocity));
+	//	float rotationAmount = glm::length(glm::vec3(velocity.x, 0.f, velocity.z)) * deltaTime / radius;
+	//	glm::mat4 incrementalRotation = glm::rotate(glm::mat4(1.0f), rotationAmount, rotationAxis);
+	//	rotationMatrix = incrementalRotation * rotationMatrix;
+	//}
+	//
+	//position += velocity * deltaTime;
 }
 
 
 void Mesh::Render(uint32_t program) const
 {
-	glBindVertexArray(vao);
+	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
+	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+
+	glBindVertexArray(bc.vao);
 	glm::mat4 model(1.f);
-	model = glm::translate(model, position);
+	model = glm::translate(model, pc.position);
 	model = model * rotationMatrix;
 	model = glm::scale(model,scale);
 	glUniformMatrix4fv(glGetUniformLocation(program, "Model"), 1, GL_FALSE, &model[0][0]);
-	glDrawElements(GL_TRIANGLES,static_cast<GLsizei>(indices.size()),GL_UNSIGNED_INT,nullptr);
+	glDrawElements(GL_TRIANGLES,static_cast<GLsizei>(bc.indices.size()),GL_UNSIGNED_INT,nullptr);
 
 	if(trackingPoints.size()>=4)
 	{
@@ -220,7 +251,7 @@ void Mesh::TrackBall(float deltaTime)
 	{
 		controlPoints.erase(controlPoints.begin());
 	}
-	controlPoints.emplace_back(position);
+	//controlPoints.emplace_back(position);
 	trackingPoints.clear();
 
 	int degree = 2;
@@ -244,17 +275,18 @@ void Mesh::TrackBall(float deltaTime)
 
 void Mesh::BindBuffer()
 {
-	glGenVertexArrays(1, &vao);
+	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
+	glGenVertexArrays(1, &bc.vao);
 	glGenVertexArrays(1, &tracking_vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1,&ebo);
+	glGenBuffers(1, &bc.vbo);
+	glGenBuffers(1,&bc.ebo);
 	glGenBuffers(1, &tracking_vbo);
 
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices.size(), indices.data(), GL_STATIC_DRAW);
+	glBindVertexArray(bc.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, bc.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * bc.vertices.size(), bc.vertices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bc.ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * bc.indices.size(), bc.indices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),nullptr);
