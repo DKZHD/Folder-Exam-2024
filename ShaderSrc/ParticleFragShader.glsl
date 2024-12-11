@@ -8,5 +8,5 @@ void main()
         discard;
     }
 
-    FragColor = vec4(0.67, 0.67, 0.95, 0.37);
+    FragColor = vec4(0.61, 0.61, 1.0, 0.45);
 }

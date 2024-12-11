@@ -5,12 +5,22 @@ in vec3 objectColor;
 
 out vec4 FragColor;
 uniform vec3 viewPos;
+uniform bool useCustomNormals;
 
 void main()
 {
-    vec3 edge1 = dFdx(FragPos);
-    vec3 edge2 = dFdy(FragPos);
-    vec3 aNormal = normalize(cross(edge1,edge2));
+    vec3 aNormal = vec3(0.0);
+    if(useCustomNormals)
+    {
+        aNormal = Normal;
+    }
+    else
+    {
+        vec3 edge1 = dFdx(FragPos);
+        vec3 edge2 = dFdy(FragPos);
+        aNormal = normalize(cross(edge1,edge2));
+    }
+
 	vec3 lightColor = vec3(1.0, 1.0, 1.0);
 
     vec3 NormalizedNormal = normalize(aNormal);

@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "ECS/Systems/Systems.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/gtx/transform.hpp"
@@ -43,7 +44,14 @@ void Engine::Run()
 		shader.Use();
 		camera.UpdateMats(shader.GetProgram());
 		shader.SetVec3("viewPos", camera.getCamPos());
+
+		MovementSystem::update(deltaTime);
+		CollisionSystem::updateBoundaries();
+		CollisionSystem::checkAndResolveWorldCollision();
+
 		scene.RenderScene(shader.GetProgram());
+
+
 
 		particleShader.Use();
 		camera.UpdateMats(particleShader.GetProgram());
@@ -54,8 +62,6 @@ void Engine::Run()
 		model = glm::scale(model, glm::vec3(0.01f));
 		glUniformMatrix4fv(glGetUniformLocation(particleShader.GetProgram(), "model"), 1, GL_FALSE, &model[0][0]);
 		mesh.Render(particleShader.GetProgram());
-
-		//scene.UpdateScene(deltaTime,gravity, collisionEnabled);
 
 		ui.render();
 		Input::processInput(window, camera);

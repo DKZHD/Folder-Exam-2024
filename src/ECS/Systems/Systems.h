@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/vec3.hpp"
+class CollisionComponent;
 enum class MeshType;
 class BufferComponent;
 
@@ -7,7 +8,6 @@ class BufferComponent;
 class ISystemBase
 {
 public:
-	virtual void update(float deltaTime){}
 	virtual ~ISystemBase() = default;
 };
 
@@ -26,7 +26,15 @@ public:
 class CollisionSystem : public ISystemBase
 {
 public:
-	static void updateBoundaries(unsigned int id);
+	static void updateBoundaries();
+
+
+	static void checkAndResolveWorldCollision();
+private:
+	static bool checkCollision(CollisionComponent& cc1, CollisionComponent& cc2);
+	static glm::vec3 calculateNormal(glm::vec3& prevPos, const CollisionComponent& cc1, const CollisionComponent& cc2);
+
+	static bool CheckBallBallCollision(unsigned id, unsigned id2);
 };
 
 class MovementSystem : public ISystemBase
@@ -44,7 +52,7 @@ public:
 
 	static void DecreaseVelocity(unsigned int id, glm::vec3 vel);
 
-	void update(float deltaTime) override;
+	static void update(float deltaTime);
 };
 
 class MeshSystem

@@ -43,48 +43,49 @@ void LuaCustom::init()
 		"EntityManager",
 		sol::no_constructor,
 		"AddEntity", &EntityManager::AddEntity,
-		"GetLast", &EntityManager::GetLastEntity
+		"GetLastEntity", &EntityManager::GetLastEntity
 	);
 
 	luaState.new_usertype<ComponentManager>(
 		"ComponentManager",
 		sol::no_constructor,
-		"addComponent", [this](ComponentManager& self, unsigned int entityID, const std::string& component)
+		"addComponent", [this](unsigned int entityID, const std::string& component)
 		{
 			if(component == "HealthComponent")
 			{
-				self.addComponents<HealthComponent>(entityID);
+				ComponentManager::GetHandler<HealthComponent>().AddComponent(entityID);
 			}
 			else if(component == "PositionComponent")
 			{
-				self.addComponents<PositionComponent>(entityID);
+				ComponentManager::GetHandler<HealthComponent>().AddComponent(entityID);
 			}
 			else if(component == "MovementComponent")
 			{
-				self.addComponents<MovementComponent>(entityID);
+				ComponentManager::GetHandler<HealthComponent>().AddComponent(entityID);
 			}
 			else if(component == "BufferComponent")
 			{
-				self.addComponents<BufferComponent>(entityID);
+				ComponentManager::GetHandler<HealthComponent>().AddComponent(entityID);
 			}
 			else if(component == "CollisionComponent")
 			{
-				self.addComponents<CollisionComponent>(entityID);
+				ComponentManager::GetHandler<HealthComponent>().AddComponent(entityID);
 			}
 		},
-		"getComponent", [this](ComponentManager& self, unsigned int entityID, const std::string& component) -> sol::object
+		"getComponent", [this](unsigned int entityID, const std::string& component) -> sol::object
 		{
 			if (component == "HealthComponent") 
 			{
-				return sol::make_object(luaState, &self.GetComponent<HealthComponent>(entityID));
+				return sol::make_object(luaState, &ComponentManager::GetHandler<HealthComponent>().GetComponent(entityID));
 			}
 			if (component == "PositionComponent") 
 			{
-				return sol::make_object(luaState, &self.GetComponent<PositionComponent>(entityID));
+				return sol::make_object(luaState, &ComponentManager::GetHandler<PositionComponent>().GetComponent(entityID));
+
 			}
 			if (component == "MovementComponent") 
 			{
-				return sol::make_object(luaState, &self.GetComponent<MovementComponent>(entityID));
+				return sol::make_object(luaState, &ComponentManager::GetHandler<MovementComponent>().GetComponent(entityID));
 			}
 			return sol::make_object(luaState, sol::nil);
 		}

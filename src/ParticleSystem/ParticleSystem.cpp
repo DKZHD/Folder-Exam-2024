@@ -1,10 +1,6 @@
 #include "ParticleSystem.h"
-
 #include <random>
-#include <thread>
-
 #include "glad/glad.h"
-#include "glm/gtc/constants.hpp"
 
 ParticleMesh::ParticleMesh(ParticleSystem& particle_system)
 {
@@ -28,7 +24,6 @@ ParticleMesh::ParticleMesh(ParticleSystem& particle_system)
 		4,5,6,6,7,4
 	};
 	BindBuffer(particle_system);
-	
 }
 
 void ParticleMesh::BindBuffer(ParticleSystem& particle_system)
@@ -88,7 +83,7 @@ void ParticleSystem::UpdatePositions(float deltaTime)
 	{
 		if(Lifetimes[i]<=0.f)
 			continue;
-		Velocities[i] = glm::clamp(Velocities[i]+=glm::vec3(0.f,-9.81f,0.f)*deltaTime, glm::vec3(0.f, -9.81f, 0.f)-wind, glm::vec3(0.f, 9.81f, 0.f)+wind);
+		Velocities[i] = glm::clamp(Velocities[i]+=glm::vec3(0.f,-9.81f,0.f)*deltaTime, glm::vec3(0.f, -9.81f, 0.f), glm::vec3(0.f, 9.81f, 0.f));
 		Positions[i] += Velocities[i] * deltaTime;
 		Lifetimes[i] -= deltaTime;
 
@@ -118,7 +113,7 @@ void ParticleSystem::EmitParticles(float deltaTime)
 			if(Lifetimes[i]<=0.f)
 			{
 				Positions[i] = glm::vec3(random(engine), systemPos.y, random(engine));
-				Velocities[i] = glm::vec3(0.f, -9.81f, 0.f) + wind;
+				Velocities[i] = glm::vec3(0.f, -9.81f, 0.f);
 				Lifetimes[i] = defaultLifetime;
 				activeParticles++;
 

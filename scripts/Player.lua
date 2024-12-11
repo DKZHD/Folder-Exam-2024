@@ -1,15 +1,8 @@
-Player = {}
-Player.__index = Player
 
-function Player:new()
-    local player = setmetatable({},Player)
-
-    player.id = EntityManager:AddEntity()
-    GenerateMesh(player.id,"Cube", vec3(0,2,0),vec3(1))
-    ComponentManager:addComponent(player.id,"HealthComponent")
-    ComponentManager:addComponent(player.id,"MovementComponent")
-    addUiFloats(string.format("Mesh %d Position", player.id),player.id)
-    return player
+for i = 0,9,1 do
+    for j = 0, 9, 1 do
+        local id = EntityManager:AddEntity()
+        GenerateMesh(id,"Sphere",vec3((j-5)*0.25,1,i-5),vec3(1))
+        addUiFloats(string.format("Mesh %d Position",id),id) 
+    end
 end
-
-Player:new()

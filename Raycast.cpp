@@ -54,13 +54,12 @@ int Raycast::GetEntityByRaycast(const glm::vec3& rayStart, const glm::vec3& rayD
 	float closestT = std::numeric_limits<float>::max();
 	int closestObject = -1;
 
+	CollisionSystem::updateBoundaries();
+
 	for (unsigned id = 0; id < Entity::globalID;id++) 
 	{
-		if(!ComponentManager::GetInstance().HasComponents<CollisionComponent>(id))
-			continue;
-		CollisionSystem::updateBoundaries(id);
 		float tNear;
-		if (RaycastIntersection(rayStart, rayDir, ComponentManager::GetInstance().GetComponent<CollisionComponent>(id).boundingBox, tNear)) {
+		if (RaycastIntersection(rayStart, rayDir, ComponentManager::GetHandler<CollisionComponent>().GetComponent(id).boundingBox, tNear)) {
 			if (tNear < closestT) {
 				closestT = tNear;
 				closestObject = id;

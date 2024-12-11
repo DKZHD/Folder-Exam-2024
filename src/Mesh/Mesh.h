@@ -46,6 +46,7 @@ public:
 	void TrackBall(float deltaTime);
 
 	glm::vec3 velocity = glm::vec3(0.f);
+	glm::vec3 position = glm::vec3(0.f);
 
 	unsigned int id = 0;
 

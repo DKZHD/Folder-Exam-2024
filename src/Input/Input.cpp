@@ -65,7 +65,14 @@ void Input::Keyboard::KeyCallback(GLFWwindow* window, int key, int scancode, int
 			break;
 
 		case GLFW_KEY_R:
-			Engine::GetInstance().luaCustom.LoadFiles("RunningScript.lua");
+			try
+			{
+				Engine::GetInstance().luaCustom.LoadFiles("RunningScript.lua");
+			}
+			catch (const sol::error& e)
+			{
+				std::cout << "Error with Lua script: " << e.what() << '\n';
+			}
 			break;
 		case GLFW_KEY_TAB:
 			if (wireframe)

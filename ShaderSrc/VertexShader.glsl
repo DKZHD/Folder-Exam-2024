@@ -13,7 +13,6 @@ uniform mat4 CamMatrix;
 void main()
 {
     objectColor = aColor;
-    // Normal = normalize(aNormal);
     Normal = mat3(transpose(inverse(Model))) * aNormal;
     FragPos = vec3(Model * vec4(aPos, 1.0));
     gl_Position = CamMatrix * vec4(FragPos, 1.0);

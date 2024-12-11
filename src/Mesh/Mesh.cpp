@@ -13,10 +13,10 @@
 Mesh::Mesh(MeshType type, glm::vec3 pos, glm::vec3 scale) : scale(scale), radius(scale.x)
 {
 	id = EntityManager::GetInstance().AddEntity();
-	ComponentManager::GetInstance().addComponents<BufferComponent>(id);
-	ComponentManager::GetInstance().addComponents<PositionComponent>(id);
-	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
-	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	ComponentManager::GetHandler<BufferComponent>().AddComponent(id);
+	ComponentManager::GetHandler<PositionComponent>().AddComponent(id);
+	BufferComponent& bc = ComponentManager::GetHandler<BufferComponent>().GetComponent(id);
+	PositionComponent& pc = ComponentManager::GetHandler<PositionComponent>().GetComponent(id);
 
 	pc.position = pos;
 
@@ -74,7 +74,8 @@ Mesh::Mesh(MeshType type, glm::vec3 pos, glm::vec3 scale) : scale(scale), radius
 
 void Mesh::Subdivide(int index1, int index2, int index3, int i, glm::vec3 color)
 {
-	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
+	BufferComponent& bc = ComponentManager::GetHandler<BufferComponent>().GetComponent(id);
+
 	if (i > 0) {
 		glm::vec3 pos1 = glm::normalize(bc.vertices[index1].pos + bc.vertices[index2].pos);
 		int t_index1 = bc.vertices.size();
@@ -105,19 +106,19 @@ void Mesh::Subdivide(int index1, int index2, int index3, int i, glm::vec3 color)
 
 void Mesh::UpdatePosition(glm::vec3 pos)
 {
-	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	PositionComponent& pc = ComponentManager::GetHandler<PositionComponent>().GetComponent(id);
 	pc.position += pos;
 }
 
 void Mesh::SetPosition(glm::vec3 pos)
 {
-	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	PositionComponent& pc = ComponentManager::GetHandler<PositionComponent>().GetComponent(id);
 	pc.position = pos;
 }
 
 glm::vec3& Mesh::GetPosition() const
 {
-	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	PositionComponent& pc = ComponentManager::GetHandler<PositionComponent>().GetComponent(id);
 	return const_cast<glm::vec3&>(pc.position);
 }
 
@@ -128,42 +129,41 @@ void Mesh::UpdateVelocity(glm::vec3 vel)
 
 bool Mesh::checkCollision(Mesh& mesh)
 {
-	//float dx = mesh.GetPosition().x - GetPosition().x;
-	//float dy = mesh.GetPosition().y - GetPosition().y;
-	//float dz = mesh.GetPosition().z - GetPosition().z;
-	//float l = sqrtf(dx * dx + dy * dy+dz*dz);
-	//float d = radius + mesh.radius;
-	//if (l >= d)
-	//	return false;
+	float dx = mesh.GetPosition().x - GetPosition().x;
+	float dy = mesh.GetPosition().y - GetPosition().y;
+	float dz = mesh.GetPosition().z - GetPosition().z;
+	float l = sqrtf(dx * dx + dy * dy+dz*dz);
+	float d = radius + mesh.radius;
+	if (l >= d)
+		return false;
 
-	//float detM = mass + mesh.mass;
-	//float numM1 = 2 * mass;
-	//float numM2 = 2 * mesh.mass;
+	float detM = mass + mesh.mass;
+	float numM1 = 2 * mass;
+	float numM2 = 2 * mesh.mass;
 
-	//float v1Num = glm::dot(velocity - mesh.velocity, GetPosition() - mesh.GetPosition());
-	//float v2Num = glm::dot(mesh.velocity - velocity, mesh.GetPosition() - GetPosition());
+	float v1Num = glm::dot(velocity - mesh.velocity, GetPosition() - mesh.GetPosition());
+	float v2Num = glm::dot(mesh.velocity - velocity, mesh.GetPosition() - GetPosition());
 
-	//float detV1 = glm::distance(GetPosition(), mesh.GetPosition());
-	//float detV2 = glm::distance(mesh.GetPosition(), GetPosition());
+	float detV1 = glm::distance(GetPosition(), mesh.GetPosition());
+	float detV2 = glm::distance(mesh.GetPosition(), GetPosition());
 
-	//glm::vec3 v1 = velocity - (numM2 / detM) * (v1Num / (detV1 * detV1)) * (GetPosition() - mesh.GetPosition());
-	//glm::vec3 v2 = mesh.velocity - (numM1 / detM) * (v2Num / (detV2 * detV2)) * (mesh.GetPosition() - GetPosition());
+	glm::vec3 v1 = velocity - (numM2 / detM) * (v1Num / (detV1 * detV1)) * (GetPosition() - mesh.GetPosition());
+	glm::vec3 v2 = mesh.velocity - (numM1 / detM) * (v2Num / (detV2 * detV2)) * (mesh.GetPosition() - GetPosition());
 
-	//velocity = v1;
-	//mesh.velocity = v2;
+	velocity = v1;
+	mesh.velocity = v2;
 
-	//glm::vec3 collisionV1 = glm::normalize(mesh.GetPosition() - GetPosition());
+	glm::vec3 collisionV1 = glm::normalize(mesh.GetPosition() - GetPosition());
 
-	//position = position + collisionV1 * ((l - d) / 2.f);
-	//mesh.position = mesh.position - collisionV1 * ((l - d) / 2.f);
+	position = position + collisionV1 * ((l - d) / 2.f);
+	mesh.position = mesh.position - collisionV1 * ((l - d) / 2.f);
 
-	//return true;
-	return false;
+	return true;
 }
 
 void Mesh::UpdateBoundingBox()
 {
-	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	PositionComponent& pc = ComponentManager::GetHandler<PositionComponent>().GetComponent(id);
 	glm::vec3 halfScale = scale * 0.5f;
 
 	boundingBox.min = pc.position - halfScale;
@@ -211,8 +211,8 @@ void Mesh::Update(float deltaTime, float gravity)
 
 void Mesh::Render(uint32_t program) const
 {
-	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
-	PositionComponent& pc = ComponentManager::GetInstance().GetComponent<PositionComponent>(id);
+	BufferComponent& bc = ComponentManager::GetHandler<BufferComponent>().GetComponent(id);
+	PositionComponent& pc = ComponentManager::GetHandler<PositionComponent>().GetComponent(id);
 
 	glBindVertexArray(bc.vao);
 	glm::mat4 model(1.f);
@@ -275,7 +275,8 @@ void Mesh::TrackBall(float deltaTime)
 
 void Mesh::BindBuffer()
 {
-	BufferComponent& bc = ComponentManager::GetInstance().GetComponent<BufferComponent>(id);
+	BufferComponent& bc = ComponentManager::GetHandler<BufferComponent>().GetComponent(id);
+
 	glGenVertexArrays(1, &bc.vao);
 	glGenVertexArrays(1, &tracking_vao);
 	glGenBuffers(1, &bc.vbo);

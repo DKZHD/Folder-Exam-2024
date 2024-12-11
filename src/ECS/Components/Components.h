@@ -30,10 +30,12 @@ class MeshPropertyComponent
 {
 public:
 	glm::vec3 scale = glm::vec3(0.f);
+	glm::mat4 rotation = glm::mat4(1.f);
 };
 
 class CollisionComponent
 {
 public:
 	AABB boundingBox;
+	MeshType type;
 };

@@ -49,15 +49,19 @@ void UI::render()
 	}
 	for (dragFloatInfo& info : dragFloats)
 	{
-		glm::vec3& vec3 = ComponentManager::GetInstance().GetComponent<PositionComponent>(info.id).position;
+		glm::vec3& vec3 = ComponentManager::GetHandler<PositionComponent>().GetComponent(info.id).position;
 		ImGui::DragFloat3(info.displayText.c_str(), &vec3.x,0.2f);
 	}
 	ImGui::End();
 	if(Raycast::GetActiveID()!=-1)
 	{
-		glm::vec3& vec3 = ComponentManager::GetInstance().GetComponent<PositionComponent>(Raycast::GetActiveID()).position;
+		glm::vec3& pos = ComponentManager::GetHandler<PositionComponent>().GetComponent(Raycast::GetActiveID()).position;
+		glm::vec3& vel = ComponentManager::GetHandler<MovementComponent>().GetComponent(Raycast::GetActiveID()).velocity;
+		glm::vec3& scale = ComponentManager::GetHandler<MeshPropertyComponent>().GetComponent(Raycast::GetActiveID()).scale;
 		ImGui::Begin("Details", nullptr, ImGuiWindowFlags_NoCollapse);
-		ImGui::DragFloat3("Active Mesh Position", &vec3.x, 0.2f);
+		ImGui::DragFloat3("Active Mesh Position", &pos.x, 0.2f);
+		ImGui::DragFloat3("Active Mesh Velocity", &vel.x, 0.2f);
+		ImGui::DragFloat3("Active Mesh Scale", &scale.x, 0.2f);
 		ImGui::End();
 	}
 	ImGui::Render();

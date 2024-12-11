@@ -22,7 +22,6 @@ class ParticleSystem
 {
 public:
 	glm::vec3 systemPos = glm::vec3(0.f,35.f,0.f);
-	glm::vec3 wind = glm::vec3(2.f,0.f,0.f);
 
 	static constexpr size_t MAX_PARTICLES = 100000;
 

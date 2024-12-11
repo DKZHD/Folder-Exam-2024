@@ -8,15 +8,5 @@ ComponentManager& ComponentManager::GetInstance()
 	return component_manager;
 }
 
-ComponentManager::ComponentManager()
-{
-	registerType<HealthComponent>();
-	registerType<PositionComponent>();
-	registerType<MovementComponent>();
-	registerType<BufferComponent>();
-	registerType<MeshPropertyComponent>();
-	registerType<CollisionComponent>();
-}
-
 
 
